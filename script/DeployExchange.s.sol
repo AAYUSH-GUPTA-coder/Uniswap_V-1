@@ -8,8 +8,10 @@ contract DeployToken is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
+        address tokenAddress;
+        // address tokenAddress = 0xtokenaddress;
 
-        Exchange exchange = new Exchange();
+        Exchange exchange = new Exchange(tokenAddress);
 
         console.log(
             "Exchange contract deployed with address: ",

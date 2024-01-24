@@ -9,12 +9,9 @@ contract DeployToken is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        Token token = new Token("USDC", "USDC", 1000000);
+        Token token = new Token("AAYUSH", "AG", 1000000);
 
-        console.log(
-            "SourceContract contract deployedwith address: ",
-            address(token)
-        );
+        console.log("Token contract deployed with address: ", address(token));
 
         vm.stopBroadcast();
     }

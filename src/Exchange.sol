@@ -21,7 +21,7 @@ contract Exchange is ERC20 {
     address public tokenAddress;
     address public factoryAddress;
 
-    constructor(address _token) ERC20("Zuniswap-V1", "ZUNI-V1") {
+    constructor(address _token) ERC20("uniswap-V1", "UNI-V1") {
         require(_token != address(0), "invalid token address");
 
         tokenAddress = _token;

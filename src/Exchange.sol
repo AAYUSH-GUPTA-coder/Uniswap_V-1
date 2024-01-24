@@ -7,9 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 interface IExchange {
     function ethToTokenSwap(uint256 _minTokens) external payable;
 
-    function ethToTokenTransfer(uint256 _minTokens, address _recipient)
-        external
-        payable;
+    function ethToTokenTransfer(
+        uint256 _minTokens,
+        address _recipient
+    ) external payable;
 }
 
 interface IFactory {
@@ -27,11 +28,9 @@ contract Exchange is ERC20 {
         factoryAddress = msg.sender;
     }
 
-    function addLiquidity(uint256 _tokenAmount)
-        public
-        payable
-        returns (uint256)
-    {
+    function addLiquidity(
+        uint256 _tokenAmount
+    ) public payable returns (uint256) {
         if (getReserve() == 0) {
             IERC20 token = IERC20(tokenAddress);
             token.transferFrom(msg.sender, address(this), _tokenAmount);
@@ -56,10 +55,9 @@ contract Exchange is ERC20 {
         }
     }
 
-    function removeLiquidity(uint256 _amount)
-        public
-        returns (uint256, uint256)
-    {
+    function removeLiquidity(
+        uint256 _amount
+    ) public returns (uint256, uint256) {
         require(_amount > 0, "invalid amount");
 
         uint256 ethAmount = (address(this).balance * _amount) / totalSupply();
@@ -105,10 +103,10 @@ contract Exchange is ERC20 {
         IERC20(tokenAddress).transfer(recipient, tokensBought);
     }
 
-    function ethToTokenTransfer(uint256 _minTokens, address _recipient)
-        public
-        payable
-    {
+    function ethToTokenTransfer(
+        uint256 _minTokens,
+        address _recipient
+    ) public payable {
         ethToToken(_minTokens, _recipient);
     }
 

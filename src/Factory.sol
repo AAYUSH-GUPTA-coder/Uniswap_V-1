@@ -6,6 +6,7 @@ import "./Exchange.sol";
 contract Factory {
     mapping(address => address) public tokenToExchange;
 
+    // function to create new Pool or exchange
     function createExchange(address _tokenAddress) public returns (address) {
         require(_tokenAddress != address(0), "invalid token address");
         require(
@@ -19,6 +20,7 @@ contract Factory {
         return address(exchange);
     }
 
+    // function to get the address of the pool
     function getExchange(address _tokenAddress) public view returns (address) {
         return tokenToExchange[_tokenAddress];
     }

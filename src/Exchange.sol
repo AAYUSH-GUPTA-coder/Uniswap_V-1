@@ -36,6 +36,7 @@ contract Exchange is ERC20 {
             token.transferFrom(msg.sender, address(this), _tokenAmount);
 
             uint256 liquidity = address(this).balance;
+            // mint liquidity Tokens
             _mint(msg.sender, liquidity);
 
             return liquidity;
@@ -70,6 +71,7 @@ contract Exchange is ERC20 {
         return (ethAmount, tokenAmount);
     }
 
+    // Balance of erc20 token of the contract
     function getReserve() public view returns (uint256) {
         return IERC20(tokenAddress).balanceOf(address(this));
     }

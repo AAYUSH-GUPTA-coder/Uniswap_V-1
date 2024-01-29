@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 error INVALID_TOKEN_ADDRESS();
 error INSUFFICIENT_TOKEN_AMOUNT();
 error INVALID_AMOUNT();
+error INVALID_RESERVE();
 
 interface IExchange {
     function ethToTokenSwap(uint256 _minTokens) external payable;
@@ -99,6 +100,7 @@ contract Exchange is ERC20 {
         return (ethAmount, tokenAmountCalculated);
     }
 
+    // function to swap tokens and send to another address, eth <-> token
     function ethToTokenTransfer(
         uint256 _minTokens,
         address _recipient
@@ -106,6 +108,7 @@ contract Exchange is ERC20 {
         ethToToken(_minTokens, _recipient);
     }
 
+    // function to swap tokens, eth <-> token
     function ethToTokenSwap(uint256 _minTokens) public payable {
         ethToToken(_minTokens, msg.sender);
     }
@@ -163,7 +166,7 @@ contract Exchange is ERC20 {
     ////////////////////////////////////
     //          PRIVATE             ///
     ///////////////////////////////////
-
+    // private function to transfer tokens
     function ethToToken(uint256 _minTokens, address recipient) private {
         uint256 tokenReserve = getReserve();
         uint256 tokensBought = getAmount(
@@ -172,20 +175,27 @@ contract Exchange is ERC20 {
             tokenReserve
         );
 
-        require(tokensBought >= _minTokens, "insufficient output amount");
+        if (tokensBought < _minTokens) revert INSUFFICIENT_TOKEN_AMOUNT();
 
         IERC20(tokenAddress).transfer(recipient, tokensBought);
     }
 
+    /**
+     * @notice function to get the output token amount
+     * @dev output token amount already deducted the pool / swap fee of 1%
+     * @param inputAmount amount to swap
+     * @param inputReserve amount of input token in the smart contract
+     * @param outputReserve amount of output token in the smart contract
+     */
     function getAmount(
         uint256 inputAmount,
         uint256 inputReserve,
         uint256 outputReserve
     ) private pure returns (uint256) {
-        require(inputReserve > 0 && outputReserve > 0, "invalid reserves");
+        if (inputReserve == 0 && outputReserve == 0) revert INVALID_RESERVE();
 
         uint256 inputAmountWithFee = inputAmount * 99;
-        uint256 numerator = inputAmountWithFee * outputReserve;
+        uint256 numerator = outputReserve * inputAmountWithFee;
         uint256 denominator = (inputReserve * 100) + inputAmountWithFee;
 
         return numerator / denominator;

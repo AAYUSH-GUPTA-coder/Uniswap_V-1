@@ -4,7 +4,7 @@
  * @notice Some things to remember,
  * Uinswap only allow swapping of ETH <-> Token, not Token0 <-> Token1, remember that
  * LP Tokens minted for user is equal to the amount of ETH
- *
+ * @note All the ERC20 functions are for LP tokens
  */
 
 //SPDX-License-Identifier: Unlicense
@@ -17,6 +17,7 @@ error INVALID_TOKEN_ADDRESS();
 error INSUFFICIENT_TOKEN_AMOUNT();
 error INVALID_AMOUNT();
 error INVALID_RESERVE();
+error INSUFFICIENT_OUTPUT_AMOUNT();
 
 interface IExchange {
     function ethToTokenSwap(uint256 _minTokens) external payable;
@@ -35,7 +36,7 @@ contract Exchange is ERC20 {
     address public tokenAddress;
     address public factoryAddress;
 
-    constructor(address _token) ERC20("uniswap-V1", "UNI-V1") {
+    constructor(address _token) ERC20("Liquidity-Token", "LT") {
         if (_token == address(0)) revert INVALID_TOKEN_ADDRESS();
 
         // set token
@@ -56,8 +57,8 @@ contract Exchange is ERC20 {
             IERC20 token = IERC20(tokenAddress);
             token.transferFrom(msg.sender, address(this), _tokenAmount);
 
+            // mint LP Tokens, amount of LP is equal to amount of ETH
             uint256 liquidity = address(this).balance;
-            // mint LP Tokens
             _mint(msg.sender, liquidity);
 
             return liquidity;
@@ -113,6 +114,7 @@ contract Exchange is ERC20 {
         ethToToken(_minTokens, msg.sender);
     }
 
+    // function to swap ETH, token <-> eth
     function tokenToEthSwap(uint256 _tokensSold, uint256 _minEth) public {
         uint256 tokenReserve = getReserve();
         uint256 ethBought = getAmount(
@@ -121,7 +123,7 @@ contract Exchange is ERC20 {
             address(this).balance
         );
 
-        require(ethBought >= _minEth, "insufficient output amount");
+        if (ethBought < _minEth) revert INSUFFICIENT_OUTPUT_AMOUNT();
 
         IERC20(tokenAddress).transferFrom(
             msg.sender,

@@ -18,6 +18,9 @@ error INSUFFICIENT_TOKEN_AMOUNT();
 error INVALID_AMOUNT();
 error INVALID_RESERVE();
 error INSUFFICIENT_OUTPUT_AMOUNT();
+error ETHSOLD_IS_TOO_SMALL();
+error TOKENSOLD_IS_TOO_SMALL();
+error INVALID_EXCHANGE_ADDRESS();
 
 interface IExchange {
     function ethToTokenSwap(uint256 _minTokens) external payable;
@@ -85,6 +88,9 @@ contract Exchange is ERC20 {
         }
     }
 
+    /**
+     * function to remove Liquidity
+     */
     function removeLiquidity(
         uint256 _amount
     ) public returns (uint256, uint256) {
@@ -141,10 +147,9 @@ contract Exchange is ERC20 {
         address exchangeAddress = IFactory(factoryAddress).getExchange(
             _tokenAddress
         );
-        require(
-            exchangeAddress != address(this) && exchangeAddress != address(0),
-            "invalid exchange address"
-        );
+        if (exchangeAddress == address(this) && exchangeAddress == address(0)) {
+            revert INVALID_EXCHANGE_ADDRESS();
+        }
 
         uint256 tokenReserve = getReserve();
         uint256 ethBought = getAmount(
@@ -213,7 +218,7 @@ contract Exchange is ERC20 {
     }
 
     function getTokenAmount(uint256 _ethSold) public view returns (uint256) {
-        require(_ethSold > 0, "ethSold is too small");
+        if (_ethSold == 0) revert ETHSOLD_IS_TOO_SMALL();
 
         uint256 tokenReserve = getReserve();
 
@@ -221,7 +226,7 @@ contract Exchange is ERC20 {
     }
 
     function getEthAmount(uint256 _tokenSold) public view returns (uint256) {
-        require(_tokenSold > 0, "tokenSold is too small");
+        if (_tokenSold == 0) revert TOKENSOLD_IS_TOO_SMALL();
 
         uint256 tokenReserve = getReserve();
 
